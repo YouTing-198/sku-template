@@ -5,8 +5,8 @@
       积云编程
     </span>
     <!-- 左侧菜单缩放 -->
-    <div class="icon-button">
-      <el-icon @click="changeIsCollapse">
+    <div class="icon-button" @click="changeIsCollapse">
+      <el-icon>
         <Fold />
       </el-icon>
     </div>
