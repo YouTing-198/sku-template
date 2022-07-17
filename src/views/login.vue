@@ -12,7 +12,11 @@
       </div>
       <el-form ref="formRef" :model="loginForm" :rules="rules">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名">
+          <el-input
+            v-model="loginForm.username"
+            placeholder="请输入用户名"
+            @keyup.enter="handleLogin"
+          >
             <template #prefix>
               <el-icon>
                 <User />
@@ -26,6 +30,7 @@
             placeholder="请输入密码"
             show-password
             type="password"
+            @keyup.enter="handleLogin"
           >
             <template #prefix>
               <el-icon>
@@ -35,7 +40,13 @@
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-button color="#626aef" round @click="handleLogin">登录</el-button>
+          <el-button
+            :loading="loading"
+            color="#626aef"
+            round
+            @click="handleLogin"
+            >登录</el-button
+          >
         </el-form-item>
       </el-form>
     </el-col>
@@ -46,6 +57,7 @@
 import { reactive, ref } from 'vue'
 import rules from './rules'
 import { useStore } from 'vuex'
+const loading = ref(false)
 const store = useStore()
 const formRef = ref(null)
 const loginForm = reactive({
@@ -54,10 +66,13 @@ const loginForm = reactive({
 })
 const handleLogin = async () => {
   try {
+    loading.value = true
     await formRef.value.validate()
     await store.dispatch('user/login', loginForm)
   } catch (e) {
     console.log(e, 'login')
+  } finally {
+    loading.value = false
   }
 }
 </script>
