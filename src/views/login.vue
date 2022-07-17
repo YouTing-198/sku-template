@@ -10,9 +10,9 @@
         <div>账号密码登录</div>
         <div class="line"></div>
       </div>
-      <el-form>
-        <el-form-item>
-          <el-input placeholder="请输入用户名">
+      <el-form ref="formRef" :model="loginForm" :rules="rules">
+        <el-form-item prop="username">
+          <el-input v-model="loginForm.username" placeholder="请输入用户名">
             <template #prefix>
               <el-icon>
                 <User />
@@ -20,8 +20,13 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input placeholder="请输入密码" show-password type="password">
+        <el-form-item prop="password">
+          <el-input
+            v-model="loginForm.password"
+            placeholder="请输入密码"
+            show-password
+            type="password"
+          >
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -30,14 +35,34 @@
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-button color="#626aef" round>登录</el-button>
+          <el-button color="#626aef" round @click="handleLogin">登录</el-button>
         </el-form-item>
       </el-form>
     </el-col>
   </el-row>
 </template>
 
-<script setup></script>
+<script setup>
+import { reactive, ref } from 'vue'
+import rules from './rules'
+import { useStore } from 'vuex'
+import { Notification } from '@/utils/Notification'
+const store = useStore()
+const formRef = ref(null)
+const loginForm = reactive({
+  username: 'admin',
+  password: 'admin'
+})
+const handleLogin = async () => {
+  try {
+    await formRef.value.validate()
+    await store.dispatch('user/login', loginForm)
+    Notification('登录成功', '', 'success')
+  } catch (e) {
+    console.log(e, 'login')
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 .login-container {
