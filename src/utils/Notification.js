@@ -1,9 +1,9 @@
 import { ElNotification } from 'element-plus'
 
-export const Notification = (title, msg, type) => {
+export const Notification = (title, message, type) => {
   ElNotification({
     title,
-    msg,
+    message,
     type
   })
 }
