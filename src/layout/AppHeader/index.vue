@@ -4,9 +4,9 @@
       <el-icon><Eleme /></el-icon>
       积云编程
     </span>
-    <!-- 左侧菜单缩进 -->
+    <!-- 左侧菜单缩放 -->
     <div class="icon-button">
-      <el-icon>
+      <el-icon @click="changeIsCollapse">
         <Fold />
       </el-icon>
     </div>
@@ -185,6 +185,10 @@ const userInfo = computed(() => {
       'https://portrait.gitee.com/uploads/avatars/user/3659/10978559_suyuan_0_1652861325.png'
   }
 })
+// 菜单缩放
+const changeIsCollapse = () => {
+  store.commit('menu/changeIsCollapse')
+}
 </script>
 
 <style lang="scss" scoped>
