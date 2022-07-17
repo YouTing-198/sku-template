@@ -47,6 +47,8 @@ import { reactive, ref } from 'vue'
 import rules from './rules'
 import { useStore } from 'vuex'
 import { Notification } from '@/utils/Notification'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const store = useStore()
 const formRef = ref(null)
 const loginForm = reactive({
@@ -58,6 +60,7 @@ const handleLogin = async () => {
     await formRef.value.validate()
     await store.dispatch('user/login', loginForm)
     Notification('登录成功', '', 'success')
+    router.push('/')
   } catch (e) {
     console.log(e, 'login')
   }
