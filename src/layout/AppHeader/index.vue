@@ -28,8 +28,8 @@
         <!-- 下拉菜单 -->
         <el-dropdown trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
-            <el-avatar :size="30"></el-avatar>
-            <span class="username">admin</span>
+            <el-avatar :size="30" :src="userInfo.avatar"></el-avatar>
+            <span class="username">{{ userInfo.username }}</span>
             <el-icon><ArrowDown /></el-icon>
           </span>
           <template #dropdown>
@@ -89,6 +89,7 @@ import { useStore } from 'vuex'
 import screenfull from 'screenfull'
 import { ref, nextTick, computed, reactive } from 'vue'
 import { Notification } from '@/utils/Notification'
+const store = useStore()
 // 验证规则
 const rules = {
   oldPassword: [
@@ -133,7 +134,6 @@ const isFullscreen = ref(true)
 const screenfullTltle = computed(() => {
   return !isFullscreen.value ? '退出全屏' : '全屏'
 })
-const store = useStore()
 const handleCommand = (command) => {
   switch (command) {
     case 'editPwd':
@@ -176,6 +176,15 @@ const handleSubmit = async () => {
     console.log(e)
   }
 }
+// 用户信息
+const userInfo = computed(() => {
+  const { username } = store.getters.userInfo
+  return {
+    username,
+    avatar:
+      'https://portrait.gitee.com/uploads/avatars/user/3659/10978559_suyuan_0_1652861325.png'
+  }
+})
 </script>
 
 <style lang="scss" scoped>

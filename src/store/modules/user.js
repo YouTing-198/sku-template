@@ -32,7 +32,7 @@ export default {
     },
     async getUserInfo({ commit }) {
       try {
-        const { data } = await userInfoAPI()
+        const data = await userInfoAPI()
         commit('setUserInfo', data)
       } catch (e) {
         console.log(e, 'vuex/user')
