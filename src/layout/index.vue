@@ -1,13 +1,40 @@
 <template>
   <el-container>
-    <el-header>Header</el-header>
+    <el-header>
+      <AppHeader />
+    </el-header>
     <el-container>
-      <el-aside width="200px">Aside</el-aside>
-      <el-main>Main</el-main>
+      <el-aside width="250px">
+        <AppAside />
+      </el-aside>
+      <el-main>
+        <AppMain />
+      </el-main>
     </el-container>
   </el-container>
 </template>
 
-<script setup></script>
+<script setup>
+import AppHeader from './AppHeader'
+import AppAside from './AppAside'
+import AppMain from './AppMain'
+</script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+.el-container {
+  height: 100%;
+  .el-header {
+    background: #4338ca;
+    height: 64px;
+  }
+  & > .el-container {
+    .el-aside {
+      transition: all 2s;
+      background: #fdfdfd;
+    }
+    .el-main {
+      background: #f3f4f6;
+    }
+  }
+}
+</style>
