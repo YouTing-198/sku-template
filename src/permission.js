@@ -16,6 +16,9 @@ router.beforeEach(async (to, from, next) => {
     if (JSON.stringify(userInfo) === '{}') {
       await store.dispatch('user/getUserInfo')
       const routes = filterRoutes(store.getters.menus)
+      router.addRoute({
+        redirect: '/index'
+      })
       routes.forEach((item) => {
         router.addRoute('layout', item)
       })
