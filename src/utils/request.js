@@ -1,28 +1,37 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import store from '@/store'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 // 创建axios实例
-const service = axios.create({
+const instance = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   timeout: 5000
 })
-// 请求拦截器
-service.interceptors.request.use(
+
+// 添加请求拦截器
+instance.interceptors.request.use(
   (config) => {
+    NProgress.start()
     const token = store.getters.token
     if (token) {
       config.headers.token = token
     }
+    // 在发送请求之前做些什么
     return config
   },
   (error) => {
-    _showError('请求超时')
+    NProgress.done()
+    // 对请求错误做些什么
     return Promise.reject(error)
   }
 )
-// 响应拦截器
-service.interceptors.response.use(
+
+// 添加响应拦截器
+instance.interceptors.response.use(
   (response) => {
+    NProgress.done()
+    // 对响应数据做点什么
     const {
       status,
       data: { msg, data }
@@ -34,6 +43,7 @@ service.interceptors.response.use(
     return Promise.reject(msg)
   },
   (error) => {
+    NProgress.done()
     const { message } = error
     if (message.includes('Network Error')) {
       _showError('网络错误')
@@ -63,20 +73,20 @@ service.interceptors.response.use(
       default:
         _showError(msg)
     }
+    // 对响应错误做点什么
     return Promise.reject(error)
   }
 )
-// 响应提示信息
-const _showError = (message) => {
-  const info = message || '发生未知错误'
-  ElMessage.error(info)
+
+const _showError = (msg) => {
+  ElMessage.error(msg)
 }
-// 统一了传参处理
-const request = (options) => {
-  if (options.method.toLowerCase() === 'get') {
-    options.params = options.data || {}
-  }
-  return service(options)
+
+// 统一传参
+const request = (data) => {
+  data.params =
+    data.method.toLowerCase() === 'get' ? (data.params = data.data) : {}
+  return instance(data)
 }
-// 导出axios实例对象
+
 export default request

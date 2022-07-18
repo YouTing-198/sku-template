@@ -17,6 +17,11 @@ const routes = [
         component: () => import('@/views/404')
       }
     ]
+  },
+  {
+    path: '/testIcon',
+    name: 'testIcon',
+    component: () => import('@/views/testIcon')
   }
 ]
 
