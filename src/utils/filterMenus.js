@@ -1,4 +1,5 @@
 export const filterMenus = (menus) => {
+  if (!menus) return []
   const newMenus = []
   menus.forEach((item) => {
     const result = {

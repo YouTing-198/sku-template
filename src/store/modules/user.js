@@ -3,6 +3,7 @@ import { setItem, getItem } from '@/utils/storage'
 import { TOKEN } from '@/utils/constants'
 import router from '@/router'
 import { Notification } from '@/utils/Notification'
+import { resetRouter } from '@/utils/resetRouter'
 
 export default {
   namespaced: true,
@@ -41,6 +42,7 @@ export default {
     async userLogout({ commit }) {
       try {
         await logoutAPI()
+        resetRouter()
         commit('setToken', '')
         commit('setUserInfo', {})
         Notification('退出登录成功', '', 'success')
