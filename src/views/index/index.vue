@@ -44,11 +44,24 @@
           <template #header>
             <span class="title">订单统计</span>
             <div class="check-tag">
-              <el-check-tag>近1个月</el-check-tag>
-              <el-check-tag>近1周</el-check-tag>
-              <el-check-tag>近24小时</el-check-tag>
+              <el-check-tag
+                :checked="echartType === 'month'"
+                @click="changeEchartType('month')"
+                >近1个月</el-check-tag
+              >
+              <el-check-tag
+                :checked="echartType === 'week'"
+                @click="changeEchartType('week')"
+                >近1周</el-check-tag
+              >
+              <el-check-tag
+                :checked="echartType === 'hour'"
+                @click="changeEchartType('hour')"
+                >近24小时</el-check-tag
+              >
             </div>
           </template>
+          <div id="echarts"></div>
         </el-card>
       </el-col>
       <!--      右侧-->
@@ -100,24 +113,30 @@
 
 <script setup>
 import { statistics1API, statistics2API, statistics3API } from '@/api'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import routerList from './routerList'
 import { useRouter } from 'vue-router'
+import * as echarts from 'echarts'
+
 const router = useRouter()
 const skeletonLoading = ref(true)
 const panelsList = ref([])
 const goodsList = ref([])
 const orderList = ref([])
+const echartType = ref('week')
+const echartLoading = ref(null)
 const getStatistics = async () => {
   try {
     const { panels } = await statistics1API()
     const { goods, order } = await statistics2API()
-    const res = await statistics3API({ type: 'week' })
+    const { x, y } = await statistics3API({ type: echartType.value })
     panelsList.value = panels
     goodsList.value = goods
     orderList.value = order
     skeletonLoading.value = false
-    console.log(res)
+    nextTick(() => {
+      generateEcharts(x, y)
+    })
   } catch (e) {
     console.log(e)
   }
@@ -126,10 +145,49 @@ getStatistics()
 const toViews = (path) => {
   router.push(path)
 }
+// 柱状图
+const generateEcharts = (x, y) => {
+  const chartDom = document.querySelector('#echarts')
+  const myChart = echarts.init(chartDom)
+  echartLoading.value = myChart
+  const option = {
+    xAxis: {
+      type: 'category',
+      data: x
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        data: y,
+        type: 'bar',
+        showBackground: true,
+        backgroundStyle: {
+          color: 'rgba(180, 180, 180, 0.2)'
+        }
+      }
+    ]
+  }
+  option && myChart.setOption(option)
+}
+// 切换图表
+const changeEchartType = async (type) => {
+  try {
+    echartLoading.value.showLoading()
+    echartType.value = type
+    await getStatistics()
+  } catch (e) {
+    console.log(e)
+  }
+  echartLoading.value.hideLoading()
+}
 </script>
+
 <style lang="scss" scoped>
 .top_1 {
   transition: all 0.5s;
+
   ::v-deep(.el-card) {
     .el-card__header {
       display: flex;
@@ -137,16 +195,20 @@ const toViews = (path) => {
       background: #f9fafb;
       height: 50px;
       align-items: center;
+
       .title {
         font-size: 15px;
       }
     }
+
     .el-card__body {
       color: rgba(107, 114, 128);
+
       .text_1 {
         font-weight: 700;
         font-size: 40px;
       }
+
       .body_footer {
         display: flex;
         justify-content: space-between;
@@ -154,24 +216,29 @@ const toViews = (path) => {
     }
   }
 }
+
 .top_2 {
   transition: all 0.5s;
   margin: 20px -10px;
+
   ::v-deep(.el-col) {
     flex: 0 0 12.5%;
     max-width: 12.5%;
   }
+
   .card-flex {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     .title {
       font-size: 15px;
       margin-top: 10px;
     }
   }
 }
+
 .top_3 {
   .left_1 {
     ::v-deep(.el-card) {
@@ -200,6 +267,7 @@ const toViews = (path) => {
         background: #f9fafb;
         height: 40px;
         align-items: center;
+
         .title {
           font-size: 15px;
         }
@@ -214,5 +282,10 @@ const toViews = (path) => {
       }
     }
   }
+}
+
+#echarts {
+  height: 300px;
+  width: 600px;
 }
 </style>
