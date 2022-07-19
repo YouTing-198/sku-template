@@ -177,13 +177,19 @@
       <template #header>
         <span>新增</span>
       </template>
-      <el-form label-width="90px">
-        <el-form-item label="商品名称">
+      <el-form
+        ref="goodsModelRef"
+        :model="goodsModel"
+        :rules="formRules"
+        label-width="100px"
+      >
+        <el-form-item label="商品名称" prop="title">
           <el-input
-            v-model="goodsModel.title"
+            v-model.trim="goodsModel.title"
             :maxlength="60"
             placeholder="请输入商品名称，不能超过60字符"
-          ></el-input>
+          >
+          </el-input>
         </el-form-item>
         <el-form-item label="封面">
           <el-upload list-type="picture-card">
@@ -192,8 +198,11 @@
             </el-icon>
           </el-upload>
         </el-form-item>
-        <el-form-item label="商品分类">
-          <el-select placeholder="请选择商品分类">
+        <el-form-item label="商品分类" prop="category_id">
+          <el-select
+            v-model="goodsModel.category_id"
+            placeholder="请选择商品分类"
+          >
             <el-option
               v-for="item in catesList"
               :key="item.id"
@@ -203,44 +212,56 @@
           </el-select>
         </el-form-item>
         <el-form-item label="商品描述">
-          <el-input placeholder="选填，商品卖点" type="textarea"></el-input>
+          <el-input
+            v-model.trim="goodsModel.desc"
+            placeholder="选填，商品卖点"
+            type="textarea"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="单位" style="width: 400px">
-          <el-input placeholder="请输入单位" value="件" />
+        <el-form-item label="单位" prop="unit" style="width: 400px">
+          <el-input
+            v-model.trim="goodsModel.unit"
+            placeholder="请输入单位"
+            value="件"
+          />
         </el-form-item>
-        <el-form-item label="总库存" style="width: 300px">
-          <el-input type="number" value="100">
+        <el-form-item label="总库存" prop="stock" style="width: 300px">
+          <el-input v-model="goodsModel.stock" type="number">
             <template #append>件</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="库存预警" style="width: 300px">
-          <el-input type="number" value="10">
+        <el-form-item label="库存预警" prop="min_stock" style="width: 300px">
+          <el-input v-model="goodsModel.min_stock" type="number">
             <template #append>件</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="最低销售价" style="width: 300px">
-          <el-input type="number" value="0">
+        <el-form-item label="最低销售价" prop="min_price" style="width: 300px">
+          <el-input v-model="goodsModel.min_price" type="number">
             <template #append>元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="最低原价" style="width: 300px">
-          <el-input type="number" value="0">
+        <el-form-item label="最低原价" prop="min_oprice" style="width: 300px">
+          <el-input v-model.number="goodsModel.min_oprice" type="number">
             <template #append>元</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="库存显示">
-          <el-radio label="隐藏"></el-radio>
-          <el-radio label="显示"></el-radio>
+        <el-form-item label="库存显示" prop="stock_display">
+          <el-radio-group v-model="goodsModel.stock_display">
+            <el-radio label="0">隐藏</el-radio>
+            <el-radio label="1">显示</el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="是否上架">
-          <el-radio label="放入仓库"></el-radio>
-          <el-radio label="立即上架"></el-radio>
+        <el-form-item label="是否上架" prop="status">
+          <el-radio-group v-model="goodsModel.status">
+            <el-radio label="0">放入仓库</el-radio>
+            <el-radio label="1">立即上架</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
       <template #footer>
         <div style="display: flex; justify-content: flex-start">
-          <el-button type="primary">提交</el-button>
-          <el-button>取消</el-button>
+          <el-button type="primary" @click="handleSubmitGoods">提交</el-button>
+          <el-button @click="handleDrawerClose">取消</el-button>
         </div>
       </template>
     </el-drawer>
@@ -248,12 +269,16 @@
 </template>
 
 <script setup>
-import { goodsListAPI } from '@/api/goods'
+import { goodsListAPI, addGoodsAPI } from '@/api/goods'
 import { reactive, ref } from 'vue'
 import tabsOptions from './tabsOptions'
 import Atable from '@/components/Table/a-table'
 import tableClos from './tableClos'
 import Paging from '@/components/Paging'
+import formRules from './formRules'
+import { Notification } from '@/utils/Notification'
+// 表单ref
+const goodsModelRef = ref(null)
 // 添加--修改-数据模型
 const goodsModel = reactive({
   category_id: '',
@@ -261,11 +286,12 @@ const goodsModel = reactive({
   desc: '',
   min_oprice: '',
   min_price: '',
-  status: '',
+  status: '1',
   stock: 100,
-  stock_display: 1,
+  stock_display: '1',
   title: '',
-  unit: '件'
+  unit: '件',
+  min_stock: 10
 })
 // 抽屉是否显示
 const drawerShow = ref(false)
@@ -321,6 +347,24 @@ const reset = () => {
 // 新增商品
 const handleAddGoods = () => {
   drawerShow.value = true
+}
+// 添加商品
+const handleSubmitGoods = async () => {
+  try {
+    await goodsModelRef.value.validate()
+    await addGoodsAPI(goodsModel)
+    drawerShow.value = false
+    Notification('添加成功', '', 'success')
+    getGoodsList()
+    handleDrawerClose()
+  } catch (e) {
+    console.log(e, 'handleSubmitGoods')
+  }
+}
+// 抽屉隐藏
+const handleDrawerClose = () => {
+  drawerShow.value = false
+  goodsModelRef.value.resetFields()
 }
 </script>
 
