@@ -82,10 +82,10 @@
           </el-tooltip>
         </div>
       </div>
-      <!--     表格 -->
-      <Atable :clos="tableClos" :data="goodsList">
+      <!-- 表格 -->
+      <Atable :clos="tableClos" :data="goodsList" :stripe="true">
         <template v-slot:content="{ row }">
-          <!--          {{ row.category.name }}-->
+          <!-- {{ row.category.name }} -->
           <div class="content">
             <img :src="row.cover" alt="" />
             <div class="right-cell">

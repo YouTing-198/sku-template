@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data" stripe>
+  <el-table :data="data" :stripe="stripe" style="width: 100%">
     <el-table-column
       v-for="(item, i) in clos"
       :key="i"
@@ -31,11 +31,15 @@ defineProps({
   data: {
     type: Array,
     default: () => []
+  },
+  stripe: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .el-table {
   margin-top: 20px;
 }
