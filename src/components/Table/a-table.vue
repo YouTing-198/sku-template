@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data">
+  <el-table :data="data" stripe>
     <el-table-column
       v-for="(item, i) in clos"
       :key="i"
