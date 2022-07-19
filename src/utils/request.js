@@ -75,7 +75,7 @@ instance.interceptors.response.use(
         Notification('服务器错误', '', 'error')
         break
       default:
-        Notification(msg, '', 'error')
+        Notification('', msg, 'error')
     }
     // 对响应错误做点什么
     return Promise.reject(error)

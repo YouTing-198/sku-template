@@ -24,8 +24,9 @@ export const goodsListAPI = (current, data) => {
  * 添加商品
  */
 export const addGoodsAPI = (data) => {
+  const url = data.id ? `/goods/${data.id}` : '/goods'
   return request({
-    url: '/goods',
+    url,
     method: 'POST',
     data
   })

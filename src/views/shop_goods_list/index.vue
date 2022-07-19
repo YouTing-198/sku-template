@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--    标签页-->
+    <!-- 标签页 -->
     <el-tabs v-model="queryModel.tab" @tab-click="handleChangeTab">
       <el-tab-pane
         v-for="item in tabsOptions"
@@ -10,9 +10,9 @@
       >
       </el-tab-pane>
     </el-tabs>
-    <!--    表格-->
+    <!-- 表格 -->
     <el-card shadow="never">
-      <!--      搜索-->
+      <!-- 搜索 -->
       <div class="search">
         <el-form :inline="true">
           <el-form-item :inline="true" label="关键词">
@@ -110,13 +110,13 @@
             </div>
           </div>
         </template>
-        <!--       商品状态 -->
+        <!-- 商品状态 -->
         <template v-slot:status="{ row }">
           <el-tag v-if="row.status === 1" type="success">上架</el-tag>
           <el-tag v-else type="danger">仓库</el-tag>
         </template>
-        <!--        审核状态-->
-        <template v-slot:audit="{ row }">
+        <!-- 审核状态 -->
+        <template v-slot:audit="{ row: { ischeck } }">
           <div
             style="
               width: 55px;
@@ -127,46 +127,36 @@
               justify-content: space-around;
             "
           >
-            <el-button
-              v-if="row.ischeck === 0"
-              plain
-              size="small"
-              type="success"
+            <el-button v-if="ischeck === 0" plain size="small" type="success"
               >审核通过</el-button
             >
             <el-button
-              v-if="row.ischeck === 0"
+              v-if="ischeck === 0"
               plain
               size="small"
               style="margin: 0"
               type="danger"
               >审核拒绝</el-button
             >
-            <span v-if="row.ischeck === 1">通过</span>
-            <span v-if="row.ischeck === 2">拒绝</span>
+            <span v-if="ischeck === 1">通过</span>
+            <span v-if="ischeck === 2">拒绝</span>
           </div>
         </template>
-        <!--        操作-->
-        <template v-slot:action>
-          <el-button link type="primary">修改</el-button>
+        <!-- 操作 -->
+        <template v-slot:action="{ row }">
+          <el-button link type="primary" @click="handleEditGoods(row)"
+            >修改</el-button
+          >
           <el-button link type="primary">商品规格</el-button>
           <el-button link type="primary">设置轮播图</el-button>
           <el-button link type="primary">商品详情</el-button>
           <el-button link type="primary">删除</el-button>
         </template>
       </Atable>
-      <!--      分页-->
+      <!-- 分页 -->
       <Paging :total="total" @currentChange="handleCurrent" />
     </el-card>
-    <el-select>
-      <el-option
-        v-for="item in catesList"
-        :key="item.id"
-        :label="item.name"
-        :value="item.id"
-      ></el-option>
-    </el-select>
-    <!--    添加 修改--抽屉-->
+    <!-- 添加 修改抽屉 -->
     <el-drawer
       v-model="drawerShow"
       :close-on-click-modal="false"
@@ -175,7 +165,7 @@
       size="40%"
     >
       <template #header>
-        <span>新增</span>
+        <span>{{ drawerTitle }}</span>
       </template>
       <el-form
         ref="goodsModelRef"
@@ -270,13 +260,17 @@
 
 <script setup>
 import { goodsListAPI, addGoodsAPI } from '@/api/goods'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import tabsOptions from './tabsOptions'
 import Atable from '@/components/Table/a-table'
 import tableClos from './tableClos'
 import Paging from '@/components/Paging'
 import formRules from './formRules'
 import { Notification } from '@/utils/Notification'
+// 抽屉标题
+const drawerTitle = computed(() => {
+  return goodsModel.id ? '修改' : '新增'
+})
 // 表单ref
 const goodsModelRef = ref(null)
 // 添加--修改-数据模型
@@ -354,17 +348,25 @@ const handleSubmitGoods = async () => {
     await goodsModelRef.value.validate()
     await addGoodsAPI(goodsModel)
     drawerShow.value = false
-    Notification('添加成功', '', 'success')
+    Notification(goodsModel.id ? '修改成功' : '添加成功', '', 'success')
     getGoodsList()
-    handleDrawerClose()
   } catch (e) {
     console.log(e, 'handleSubmitGoods')
+  } finally {
+    handleDrawerClose()
   }
 }
-// 抽屉隐藏
+// 抽屉隐藏 & 重置表单数据
 const handleDrawerClose = () => {
   drawerShow.value = false
   goodsModelRef.value.resetFields()
+}
+// 修改商品
+const handleEditGoods = (row) => {
+  for (const key in row) {
+    goodsModel[key] = row[key] + ''
+  }
+  drawerShow.value = true
 }
 </script>
 

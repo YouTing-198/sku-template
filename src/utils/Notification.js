@@ -4,6 +4,7 @@ export const Notification = (title, message, type) => {
   ElNotification({
     title,
     message,
-    type
+    type,
+    dangerouslyUseHTMLString: true
   })
 }
