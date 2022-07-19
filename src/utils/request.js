@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 import store from '@/store'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import { Notification } from '@/utils/Notification'
 // 创建axios实例
 const instance = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
@@ -42,7 +42,7 @@ instance.interceptors.response.use(
     if (status === 200) {
       return data
     }
-    _showError(msg)
+    Notification(msg)
     return Promise.reject(msg)
   },
   (error) => {
@@ -50,11 +50,11 @@ instance.interceptors.response.use(
     store.dispatch('loading/endLoading')
     const { message } = error
     if (message.includes('Network Error')) {
-      _showError('网络错误')
+      Notification('网络错误', '', 'error')
       return Promise.reject(message)
     }
     if (message.includes('timeout')) {
-      _showError('请求超时')
+      Notification('请求超时', '', 'error')
       return Promise.reject(message)
     }
     const {
@@ -63,28 +63,24 @@ instance.interceptors.response.use(
     } = error.response
     switch (status) {
       case 401:
-        _showError('登录已过期，请重新登录')
+        Notification('登录已过期，请重新登录', '', 'error')
         break
       case 403:
-        _showError('没有权限')
+        Notification('没有权限', '', 'error')
         break
       case 404:
-        _showError('请求资源不存在')
+        Notification('请求资源不存在', '', 'error')
         break
       case 500:
-        _showError('服务器错误')
+        Notification('服务器错误', '', 'error')
         break
       default:
-        _showError(msg)
+        Notification(msg, '', 'error')
     }
     // 对响应错误做点什么
     return Promise.reject(error)
   }
 )
-
-const _showError = (msg) => {
-  ElMessage.error(msg)
-}
 
 // 统一传参
 const request = (data) => {
