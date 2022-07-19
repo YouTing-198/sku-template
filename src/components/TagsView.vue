@@ -124,7 +124,6 @@ const changeView = ({ props: { name } }) => {
   padding: 0 8px 0 8px;
   box-sizing: border-box;
   background: #f3f4f6;
-  z-index: 99;
   .el-tabs {
     height: 100%;
     flex: 1;

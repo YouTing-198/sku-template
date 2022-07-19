@@ -49,9 +49,11 @@
           </el-button>
         </div>
       </div>
-      <!--      按钮组-->
+      <!-- 按钮组 -->
       <div class="btns">
-        <el-button size="small" type="primary">新增</el-button>
+        <el-button size="small" type="primary" @click="handleAddGoods"
+          >新增</el-button
+        >
         <el-button
           v-if="queryModel.tab === 'delete'"
           size="small"
@@ -156,6 +158,92 @@
       <!--      分页-->
       <Paging :total="total" @currentChange="handleCurrent" />
     </el-card>
+    <el-select>
+      <el-option
+        v-for="item in catesList"
+        :key="item.id"
+        :label="item.name"
+        :value="item.id"
+      ></el-option>
+    </el-select>
+    <!--    添加 修改--抽屉-->
+    <el-drawer
+      v-model="drawerShow"
+      :close-on-click-modal="false"
+      :z-index="1000"
+      modal
+      size="40%"
+    >
+      <template #header>
+        <span>新增</span>
+      </template>
+      <el-form label-width="90px">
+        <el-form-item label="商品名称">
+          <el-input
+            v-model="goodsModel.title"
+            :maxlength="60"
+            placeholder="请输入商品名称，不能超过60字符"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="封面">
+          <el-upload list-type="picture-card">
+            <el-icon>
+              <Plus />
+            </el-icon>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="商品分类">
+          <el-select placeholder="请选择商品分类">
+            <el-option
+              v-for="item in catesList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品描述">
+          <el-input placeholder="选填，商品卖点" type="textarea"></el-input>
+        </el-form-item>
+        <el-form-item label="单位" style="width: 400px">
+          <el-input placeholder="请输入单位" value="件" />
+        </el-form-item>
+        <el-form-item label="总库存" style="width: 300px">
+          <el-input type="number" value="100">
+            <template #append>件</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="库存预警" style="width: 300px">
+          <el-input type="number" value="10">
+            <template #append>件</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="最低销售价" style="width: 300px">
+          <el-input type="number" value="0">
+            <template #append>元</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="最低原价" style="width: 300px">
+          <el-input type="number" value="0">
+            <template #append>元</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="库存显示">
+          <el-radio label="隐藏"></el-radio>
+          <el-radio label="显示"></el-radio>
+        </el-form-item>
+        <el-form-item label="是否上架">
+          <el-radio label="放入仓库"></el-radio>
+          <el-radio label="立即上架"></el-radio>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div style="display: flex; justify-content: flex-start">
+          <el-button type="primary">提交</el-button>
+          <el-button>取消</el-button>
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
@@ -166,6 +254,21 @@ import tabsOptions from './tabsOptions'
 import Atable from '@/components/Table/a-table'
 import tableClos from './tableClos'
 import Paging from '@/components/Paging'
+// 添加--修改-数据模型
+const goodsModel = reactive({
+  category_id: '',
+  cover: '',
+  desc: '',
+  min_oprice: '',
+  min_price: '',
+  status: '',
+  stock: 100,
+  stock_display: 1,
+  title: '',
+  unit: '件'
+})
+// 抽屉是否显示
+const drawerShow = ref(false)
 // 商品分类的显示隐藏
 const show = ref(false)
 // 页码
@@ -214,6 +317,10 @@ const reset = () => {
   queryModel.title = ''
   queryModel.category_id = ''
   getGoodsList()
+}
+// 新增商品
+const handleAddGoods = () => {
+  drawerShow.value = true
 }
 </script>
 
@@ -286,5 +393,9 @@ const reset = () => {
       color: #9ca3af;
     }
   }
+}
+::v-deep(.el-upload) {
+  width: 100px;
+  height: 100px;
 }
 </style>
