@@ -1,13 +1,5 @@
 <template>
-  <div>
-    分类管理
-  </div>
+  <div class="">分类管理</div>
 </template>
-
-<script setup>
-
-</script>
-
-<style scoped>
-
-</style>
+<script setup></script>
+<style lang="scss" scoped></style>

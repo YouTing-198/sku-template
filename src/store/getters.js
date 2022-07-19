@@ -3,5 +3,6 @@ export default {
   userInfo: (state) => state.user.userInfo,
   menus: (state) => state.user.userInfo.menus,
   isCollapse: (state) => state.menu.isCollapse,
-  tagsView: (state) => state.tagsView.tags
+  tagsView: (state) => state.tagsView.tags,
+  loading: (state) => state.loading.loading
 }

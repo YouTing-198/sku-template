@@ -13,6 +13,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     NProgress.start()
+    store.dispatch('loading/openLoading')
     const token = store.getters.token
     if (token) {
       config.headers.token = token
@@ -22,6 +23,7 @@ instance.interceptors.request.use(
   },
   (error) => {
     NProgress.done()
+    store.dispatch('loading/endLoading')
     // 对请求错误做些什么
     return Promise.reject(error)
   }
@@ -31,6 +33,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => {
     NProgress.done()
+    store.dispatch('loading/endLoading')
     // 对响应数据做点什么
     const {
       status,
@@ -44,6 +47,7 @@ instance.interceptors.response.use(
   },
   (error) => {
     NProgress.done()
+    store.dispatch('loading/endLoading')
     const { message } = error
     if (message.includes('Network Error')) {
       _showError('网络错误')

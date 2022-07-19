@@ -181,8 +181,7 @@ const userInfo = computed(() => {
   const { username } = store.getters.userInfo
   return {
     username,
-    avatar:
-      'https://portrait.gitee.com/uploads/avatars/user/3659/10978559_suyuan_0_1652861325.png'
+    avatar: 'https://avatars.githubusercontent.com/u/100115504?s=40&v=4'
   }
 })
 // 菜单缩放
