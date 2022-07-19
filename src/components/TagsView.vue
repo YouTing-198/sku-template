@@ -125,7 +125,11 @@ const changeView = ({ props: { name } }) => {
   box-sizing: border-box;
   background: #f3f4f6;
   z-index: 10;
+
   .el-tabs {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-37%);
     height: 100%;
     flex: 1;
     overflow-y: hidden;
