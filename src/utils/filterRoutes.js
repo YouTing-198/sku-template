@@ -4,6 +4,7 @@ export const filterRoutes = (routes) => {
   const result = []
   routes.forEach((item) => {
     item.child.forEach((child) => {
+      if (!item.desc && !item.icon) return
       if (child.frontpath === '/') child.frontpath = '/index'
       const route = {
         path: child.frontpath,

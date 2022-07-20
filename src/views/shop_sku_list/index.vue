@@ -11,12 +11,11 @@
         </el-tooltip>
       </div>
       <ATable :clos="clos" :data="sukList" :stripe="true">
-        <template #status="{ row }">
+        <template v-slot:status="{ row }">
           <el-switch
-            v-model="row.status"
-            :active-value="1"
-            :inactive-value="0"
+            v-model="row.switchStatus"
             style="margin: 0 10px"
+            @change="(status) => handleChangeSkuStatus(status, row)"
           ></el-switch>
         </template>
         <template #action>
@@ -36,9 +35,10 @@
 <script setup>
 import ATable from '@/components/Table/a-table'
 import Paging from '@/components/Paging'
-import { getSkuListAPI } from '@/api/skus'
+import { getSkuListAPI, updateSkuStatusAPI } from '@/api/skus'
 import { ref } from 'vue'
 import clos from './clos'
+import { Notification } from '@/utils/Notification'
 // 条
 const total = ref(0)
 // 页
@@ -50,6 +50,14 @@ const getSukList = async () => {
   try {
     const { list, totalCount } = await getSkuListAPI(current.value)
     sukList.value = list
+    // 对el-switch的v-model绑定做容错处理
+    sukList.value.forEach((item) => {
+      if (item.status === 1) {
+        item.switchStatus = true
+      } else {
+        item.switchStatus = false
+      }
+    })
     total.value = totalCount
   } catch (e) {
     console.log(e)
@@ -60,6 +68,17 @@ getSukList()
 const currentChange = (page) => {
   current.value = page
   getSukList()
+}
+// 修改状态
+const handleChangeSkuStatus = async (value, row) => {
+  try {
+    const status = { status: value ? 1 : 0 }
+    await updateSkuStatusAPI(row.id, status)
+    await getSukList()
+    Notification('修改状态成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 
