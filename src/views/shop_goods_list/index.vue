@@ -58,19 +58,37 @@
           v-if="queryModel.tab === 'delete'"
           size="small"
           type="warning"
-          >恢复商品</el-button
+          @click="handleRestoreGoods"
+          >恢复商品
+        </el-button>
+        <el-button
+          v-if="queryModel.tab !== 'delete'"
+          size="small"
+          type="danger"
+          @click="handleDelGoods"
+          >批量删除</el-button
         >
-        <el-button size="small" type="danger">彻底删除</el-button>
+        <el-popconfirm
+          v-if="queryModel.tab === 'delete'"
+          title="是否要删除该商品?"
+          @confirm="handleDeleteGoodsDestory"
+        >
+          <template #reference>
+            <el-button size="small" type="danger"> 彻底删除 </el-button>
+          </template>
+        </el-popconfirm>
         <el-button
           v-if="queryModel.tab === 'all' || queryModel.tab === 'off'"
           size="small"
-          >上架</el-button
-        >
+          @click="shelves(1)"
+          >上架
+        </el-button>
         <el-button
           v-if="queryModel.tab === 'all' || queryModel.tab === 'saling'"
           size="small"
-          >下架</el-button
-        >
+          @click="shelves(0)"
+          >下架
+        </el-button>
         <div class="right-refresh">
           <el-tooltip content="刷新数据" effect="dark" placement="top">
             <el-button
@@ -83,9 +101,13 @@
         </div>
       </div>
       <!-- 表格 -->
-      <Atable :clos="tableClos" :data="goodsList" :stripe="true">
+      <Atable
+        :clos="tableClos"
+        :data="goodsList"
+        :stripe="true"
+        @selectChange="selectChange"
+      >
         <template v-slot:content="{ row }">
-          <!-- {{ row.category.name }} -->
           <div class="content">
             <img :src="row.cover" alt="" class="cover" />
             <div class="right-cell">
@@ -144,13 +166,23 @@
         </template>
         <!-- 操作 -->
         <template v-slot:action="{ row }">
-          <el-button link type="primary" @click="handleEditGoods(row)"
-            >修改</el-button
-          >
-          <el-button link type="primary">商品规格</el-button>
-          <el-button link type="primary">设置轮播图</el-button>
-          <el-button link type="primary">商品详情</el-button>
-          <el-button link type="primary">删除</el-button>
+          <div v-if="queryModel.tab !== 'delete'">
+            <el-button link type="primary" @click="handleEditGoods(row)"
+              >修改</el-button
+            >
+            <el-button link type="primary">商品规格</el-button>
+            <el-button link type="primary">设置轮播图</el-button>
+            <el-button link type="primary">商品详情</el-button>
+            <el-popconfirm
+              title="是否要删除该商品?"
+              @confirm="handleDelGoods(row, 'one')"
+            >
+              <template #reference>
+                <el-button link type="primary">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </div>
+          <div v-else>暂无操作</div>
         </template>
       </Atable>
       <!-- 分页 -->
@@ -259,7 +291,14 @@
 </template>
 
 <script setup>
-import { goodsListAPI, addGoodsAPI } from '@/api/goods'
+import {
+  goodsListAPI,
+  addGoodsAPI,
+  changeStatusAPI,
+  goodsRestoreAPI,
+  goodsDeleteAPI,
+  goodsDeleteDestroyAPI
+} from '@/api/goods'
 import { computed, reactive, ref } from 'vue'
 import tabsOptions from './tabsOptions'
 import Atable from '@/components/Table/a-table'
@@ -299,7 +338,8 @@ const queryModel = reactive({
   tab: 'all',
   category_id: ''
 })
-// tabs选中值
+// 表格多选框选中的值
+const selected = ref([])
 // 商品列表
 const goodsList = ref([])
 const catesList = ref([])
@@ -367,6 +407,72 @@ const handleEditGoods = (row) => {
     goodsModel[key] = row[key] + ''
   }
   drawerShow.value = true
+}
+// 获取选中的值
+const selectChange = (val) => {
+  selected.value = val.map((v) => v.id)
+}
+// 上架或下架
+const shelves = async (status) => {
+  if (selected.value.length <= 0) {
+    return Notification('请先选择商品噢', '', 'error')
+  }
+  const options = {
+    status: status,
+    ids: selected.value
+  }
+  try {
+    await changeStatusAPI(options)
+    Notification('修改状态成功', '', 'success')
+    getGoodsList()
+  } catch (e) {
+    console.log(e, 'shelves')
+  }
+}
+// 恢复商品
+const handleRestoreGoods = async () => {
+  if (selected.value.length <= 0) {
+    return Notification('请先选择商品噢', '', 'error')
+  }
+  const options = {
+    ids: selected.value
+  }
+  try {
+    await goodsRestoreAPI(options)
+    Notification('恢复成功', '', 'success')
+    getGoodsList()
+  } catch (e) {
+    console.log(e, 'handleRestoreGoods')
+  }
+}
+// 删除 和批量删除
+const handleDelGoods = async (row, flag) => {
+  try {
+    const options = {
+      ids: flag ? [row.id] : selected.value
+    }
+    await goodsDeleteAPI(options)
+    Notification('删除成功', '', 'success')
+    getGoodsList()
+  } catch (e) {
+    console.log(e)
+  }
+}
+// 彻底删除商品
+const handleDeleteGoodsDestory = async () => {
+  if (selected.value.length <= 0) {
+    return Notification('请先选择商品噢', '', 'error')
+  }
+  const options = {
+    ids: selected.value
+  }
+  try {
+    await goodsDeleteDestroyAPI(options)
+    Notification('删除成功', '', 'success')
+    getGoodsList()
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 
