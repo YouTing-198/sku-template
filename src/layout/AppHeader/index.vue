@@ -72,7 +72,6 @@
           />
         </el-form-item>
       </el-form>
-      <!-- 修改密码抽屉 -->
       <template #footer>
         <div class="dialog-footer">
           <el-button type="primary" @click="handleSubmit">提交</el-button>

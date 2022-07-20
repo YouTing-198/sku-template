@@ -30,5 +30,4 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### 槽点
 
-table 高度
 抽屉动画
