@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data" :stripe="stripe" style="width: 100%">
+  <el-table :data="data" :stripe="stripe">
     <el-table-column
       v-for="(item, i) in clos"
       :key="i"

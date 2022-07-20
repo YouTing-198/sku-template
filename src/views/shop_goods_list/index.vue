@@ -87,13 +87,13 @@
         <template v-slot:content="{ row }">
           <!-- {{ row.category.name }} -->
           <div class="content">
-            <img :src="row.cover" alt="" />
+            <img :src="row.cover" alt="" class="cover" />
             <div class="right-cell">
               <p class="title">{{ row.title }}</p>
               <p class="price">
-                <span>{{ row.min_price }}</span>
+                <span>￥{{ row.min_price }}</span>
                 <span>|</span>
-                <span>{{ row.min_oprice }}</span>
+                <span>￥{{ row.min_oprice }}</span>
               </p>
               <p class="footer">
                 分类:{{
@@ -409,23 +409,25 @@ const handleEditGoods = (row) => {
 }
 .content {
   display: flex;
-  img {
+  align-items: center;
+  .cover {
     width: 50px;
     height: 50px;
     margin-right: 5px;
   }
   .right-cell {
-    font-size: 10px;
+    font-size: 12px;
+    p {
+      margin: 0;
+    }
     .title {
-      font-size: 15px;
+      font-size: 14px;
     }
     .price {
-      display: flex;
-      align-items: center;
       span {
         &:nth-of-type(1) {
-          color: #f56c6c;
-          font-size: 15px;
+          color: #f43f5c;
+          font-size: 14px;
         }
         &:nth-of-type(2) {
           font-size: 12px;
