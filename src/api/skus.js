@@ -20,3 +20,13 @@ export const updateSkuStatusAPI = (id, data) => {
     data
   })
 }
+/**
+ * 新增规格
+ */
+export const addSkusAPI = (data) => {
+  return request({
+    url: '/skus',
+    method: 'POST',
+    data
+  })
+}

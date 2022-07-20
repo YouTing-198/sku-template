@@ -1,15 +1,19 @@
 <template>
   <div>
     <el-card shadow="never">
+      <!-- 搜索 -->
       <div class="search">
         <div class="left">
-          <el-button size="small" type="primary">新增</el-button>
+          <el-button size="small" type="primary" @click="sukModelShow = true"
+            >新增</el-button
+          >
           <el-button size="small" type="danger">批量删除</el-button>
         </div>
         <el-tooltip content="刷新数据" placement="top">
           <el-button icon="refresh" text></el-button>
         </el-tooltip>
       </div>
+      <!-- 表格数据 -->
       <ATable :clos="clos" :data="sukList" :stripe="true">
         <template v-slot:status="{ row }">
           <el-switch
@@ -30,15 +34,98 @@
       <Paging :total="total" @currentChange="currentChange"></Paging>
     </el-card>
   </div>
+  <!-- 添加修改的抽屉 -->
+  <el-drawer v-model="sukModelShow" size="40%">
+    <template #header>
+      <span>新增</span>
+    </template>
+    <el-form
+      ref="skuListFormRef"
+      :model="skuListModel"
+      :rules="rules"
+      label-width="100px"
+    >
+      <el-form-item label="规格名称" prop="name">
+        <el-input
+          v-model.trim="skuListModel.name"
+          placeholder="请输入规格名称"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="排序">
+        <el-input-number
+          v-model="skuListModel.order"
+          :max="1000"
+          :min="0"
+        ></el-input-number>
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-switch
+          v-model="skuListModel.status"
+          :active-value="1"
+          :inactive-value="0"
+        ></el-switch>
+      </el-form-item>
+      <el-form-item label="规格" prop="default">
+        <el-tag
+          v-for="(tag, i) in skuListModel.default"
+          :key="i"
+          :disable-transitions="false"
+          closable
+          style="margin-right: 5px"
+          @close="handleClose(i)"
+        >
+          {{ tag }}
+        </el-tag>
+        <el-input
+          v-if="inputVisible"
+          ref="InputRef"
+          v-model.trim="inputValue"
+          size="small"
+          style="width: 100px"
+          @blur="handleInputConfirm"
+          @keyup.enter="handleInputConfirm"
+        />
+        <el-button
+          v-else
+          class="button-new-tag ml-1"
+          size="small"
+          @click="showInput"
+        >
+          + 添加值
+        </el-button>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="footer">
+        <el-button type="primary" @click="handleSubmit">提交</el-button>
+        <el-button @click="handleResetForm">取消</el-button>
+      </div>
+    </template>
+  </el-drawer>
 </template>
 
 <script setup>
 import ATable from '@/components/Table/a-table'
 import Paging from '@/components/Paging'
-import { getSkuListAPI, updateSkuStatusAPI } from '@/api/skus'
-import { ref } from 'vue'
+import { getSkuListAPI, updateSkuStatusAPI, addSkusAPI } from '@/api/skus'
+import { reactive, ref, nextTick } from 'vue'
 import clos from './clos'
 import { Notification } from '@/utils/Notification'
+import rules from './rules'
+const inputValue = ref('')
+const InputRef = ref(null)
+const inputVisible = ref(false)
+// 表单数据模型
+const skuListModel = reactive({
+  default: [],
+  name: '',
+  order: 50,
+  status: 1
+})
+// 表单ref
+const skuListFormRef = ref(null)
+// 添加--修改的抽屉的v-model
+const sukModelShow = ref(false)
 // 条
 const total = ref(0)
 // 页
@@ -69,6 +156,18 @@ const currentChange = (page) => {
   current.value = page
   getSukList()
 }
+// 添加--修改
+const handleSubmit = async () => {
+  try {
+    const options = { ...skuListModel }
+    options.default = options.default.join(',')
+    await skuListFormRef.value.validate()
+    await addSkusAPI(options)
+    await getSukList()
+    Notification('新增成功', '', 'success')
+    handleResetForm()
+  } catch (e) {}
+}
 // 修改状态
 const handleChangeSkuStatus = async (value, row) => {
   try {
@@ -80,6 +179,28 @@ const handleChangeSkuStatus = async (value, row) => {
     console.log(e)
   }
 }
+// 表单规格数据
+const showInput = () => {
+  inputVisible.value = true
+  nextTick(() => {
+    InputRef.value?.input?.focus()
+  })
+}
+const handleInputConfirm = () => {
+  if (inputValue.value) {
+    skuListModel.default.push(inputValue.value)
+  }
+  inputVisible.value = false
+  inputValue.value = ''
+}
+const handleClose = (i) => {
+  skuListModel.default.splice(i, 1)
+}
+// 关闭抽屉，重置表单
+const handleResetForm = () => {
+  skuListFormRef.value.resetFields()
+  sukModelShow.value = false
+}
 </script>
 
 <style lang="scss" scoped>
@@ -89,5 +210,9 @@ const handleChangeSkuStatus = async (value, row) => {
   & > .el-button {
     font-size: 20px;
   }
+}
+.footer {
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
