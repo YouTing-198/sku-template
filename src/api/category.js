@@ -60,3 +60,6 @@ export const deleteCategoryAPI = (id) => {
     method: 'POST'
   })
 }
+/**
+ * 分类
+ */

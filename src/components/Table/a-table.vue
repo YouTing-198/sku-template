@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="data" @selection-change="selectChange">
+  <el-table :data="data" @selection-change="selectChange" :stripe="stripe">
     <el-table-column
       v-for="(item, i) in clos"
       :key="i"
