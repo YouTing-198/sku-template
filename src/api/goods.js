@@ -67,3 +67,13 @@ export const goodsDeleteDestroyAPI = (data) => {
     data
   })
 }
+/**
+ * 商品审核
+ */
+export const goodsCheckAPI = (id, data) => {
+  return request({
+    url: `goods/${id}/check`,
+    method: 'POST',
+    data
+  })
+}
