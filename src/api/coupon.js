@@ -10,3 +10,13 @@ export const couponListAPI = (current) => {
     method: 'GET'
   })
 }
+/**
+ * 新增修改优惠券
+ */
+export const couponAPI = (data) => {
+  return request({
+    url: '/coupon',
+    method: 'POST',
+    data
+  })
+}

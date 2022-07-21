@@ -2,7 +2,9 @@
   <div>
     <el-card shadow="never">
       <div class="search">
-        <el-button size="small" type="primary">新增</el-button>
+        <el-button size="small" type="primary" @click="drawerVisable = true"
+          >新增</el-button
+        >
         <el-tooltip content="刷新数据" placement="top">
           <el-button icon="refresh" text></el-button>
         </el-tooltip>
@@ -63,15 +65,108 @@
       <Paging :total="total"></Paging>
     </el-card>
   </div>
+  <!-- 抽屉 -->
+  <el-drawer v-model="drawerVisable" size="40%">
+    <template #header>
+      <span>新增</span>
+    </template>
+    <el-form ref="couponModelRef" :model="couponModel" label-width="100px">
+      <el-form-item label="优惠券名称">
+        <el-input
+          v-model="couponModel.name"
+          placeholder="优惠券名称"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="类型">
+        <el-radio-group v-model="couponModel.type">
+          <el-radio :label="0">满减</el-radio>
+          <el-radio :label="1">折扣</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="面值">
+        <el-input v-model="couponModel.value" placeholder="面值" type="number">
+          <template #append>
+            <el-button type="info">元</el-button>
+          </template>
+        </el-input>
+      </el-form-item>
+      <el-form-item label="发行量">
+        <el-input-number
+          v-model="couponModel.total"
+          :max="1000"
+          :min="0"
+          placeholder="发行量"
+        ></el-input-number>
+      </el-form-item>
+      <el-form-item label="最低使用价格">
+        <el-input
+          v-model="couponModel.min_price"
+          placeholder="最低使用价格"
+          type="number"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="排序">
+        <el-input-number
+          v-model="couponModel.order"
+          :max="1000"
+          :min="0"
+          placeholder="排序"
+        ></el-input-number>
+      </el-form-item>
+      <el-form-item label="活动时间">
+        <el-date-picker
+          v-model="couponModel.time"
+          end-placeholder="结束时间"
+          range-separator="To"
+          start-placeholder="开始时间"
+          type="daterange"
+        />
+      </el-form-item>
+      <el-form-item label="描述">
+        <el-input
+          v-model.trim="couponModel.desc"
+          placeholder="描述"
+          style="height: 70px"
+          type="textarea"
+        ></el-input>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="footer">
+        <el-button size="small" type="primary" @click="handleSubmit"
+          >提交</el-button
+        >
+        <el-button size="small">取消</el-button>
+      </div>
+    </template>
+  </el-drawer>
 </template>
 
 <script setup>
-import { couponListAPI } from '@/api/coupon'
-import { ref } from 'vue'
+import { couponListAPI, couponAPI } from '@/api/coupon'
+import { reactive, ref } from 'vue'
 import ATable from '@/components/Table/a-table'
 import Paging from '@/components/Paging'
 import clos from './clos'
 import { couponStatus } from './couponStatus'
+import { Notification } from '@/utils/Notification'
+// 表单ref
+const couponModelRef = ref(null)
+// 抽屉组件显示隐藏
+const drawerVisable = ref(false)
+// 添加-修改数据模型
+const couponModel = reactive({
+  desc: '',
+  name: '',
+  start_time: '',
+  end_time: '',
+  total: 100,
+  value: '',
+  min_price: '',
+  type: 0,
+  order: 50,
+  time: []
+})
 // 条数
 const total = ref(0)
 // 页
@@ -89,6 +184,24 @@ const getCouponList = async () => {
   }
 }
 getCouponList()
+// 添加--修改
+const handleSubmit = async () => {
+  try {
+    couponModel.start_time = couponModel.time[0].getTime()
+    couponModel.end_time = couponModel.time[1].getTime()
+    await couponAPI(couponModel)
+    await getCouponList()
+    handleHideDrawer()
+    Notification('新增成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
+}
+// 关闭抽屉 重置表单
+const handleHideDrawer = () => {
+  drawerVisable.value = false
+  couponModelRef.value.resetFields()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -120,5 +233,9 @@ getCouponList()
   border-color: #fecdd3;
   background: #fff1f2;
   color: #f87171;
+}
+.footer {
+  display: flex;
+  justify-content: flex-start;
 }
 </style>
