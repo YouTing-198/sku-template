@@ -26,9 +26,14 @@
           <el-button link type="primary" @click="handleEditSuk(row)"
             >修改</el-button
           >
-          <el-button link type="primary" @click="handleDeleteSuk(row.id)"
-            >删除</el-button
+          <el-popconfirm
+            title="是否要删除该规格?"
+            @confirm="handleDeleteSuk(row.id)"
           >
+            <template #reference>
+              <el-button link type="primary">删除</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </ATable>
       <Paging :total="total" @currentChange="currentChange"></Paging>
@@ -107,7 +112,12 @@
 <script setup>
 import ATable from '@/components/Table/a-table'
 import Paging from '@/components/Paging'
-import { getSkuListAPI, updateSkuStatusAPI, addSkusAPI } from '@/api/skus'
+import {
+  getSkuListAPI,
+  updateSkuStatusAPI,
+  addSkusAPI,
+  deleteSkusAPI
+} from '@/api/skus'
 import { reactive, ref, nextTick, computed } from 'vue'
 import clos from './clos'
 import { Notification } from '@/utils/Notification'
@@ -213,6 +223,19 @@ const handleEditSuk = (row) => {
     skuListModel[key] = options[key]
   }
   sukModelShow.value = true
+}
+// 删除
+const handleDeleteSuk = async (id) => {
+  try {
+    const options = {
+      ids: [id]
+    }
+    await deleteSkusAPI(options)
+    await getSukList()
+    Notification('删除成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 

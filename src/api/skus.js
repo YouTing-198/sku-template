@@ -31,3 +31,13 @@ export const addSkusAPI = (data) => {
     data
   })
 }
+/**
+ * 删除规格
+ */
+export const deleteSkusAPI = (data) => {
+  return request({
+    url: 'skus/delete_all',
+    method: 'POST',
+    data
+  })
+}
