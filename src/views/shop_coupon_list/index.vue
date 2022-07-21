@@ -46,10 +46,13 @@
             size="small"
             text
             type="primary"
+            @click="handleEdit(row)"
             >修改
           </el-button>
           <el-popconfirm
             v-if="couponStatus(row.start_time, row.end_time) !== '1'"
+            title="确定要删除该优惠券吗?"
+            @confirm="handleDelete(row.id)"
           >
             <template #reference>
               <el-button text type="primary">删除</el-button>
@@ -58,17 +61,18 @@
           <el-button
             v-if="couponStatus(row.start_time, row.end_time) === '1'"
             type="danger"
-            >失效</el-button
-          >
+            @click="handleFailure(row.id)"
+            >失效
+          </el-button>
         </template>
       </ATable>
       <Paging :total="total" @currentChange="currentChange"></Paging>
     </el-card>
   </div>
-  <!-- 抽屉 -->
+  <!--  添加--修改-抽屉-->
   <el-drawer v-model="drawerVisable" size="40%">
     <template #header>
-      <span>新增</span>
+      <span>{{ drawerTilte }}</span>
     </template>
     <el-form ref="couponModelRef" :model="couponModel" label-width="100px">
       <el-form-item label="优惠券名称">
@@ -136,20 +140,29 @@
         <el-button size="small" type="primary" @click="handleSubmit"
           >提交</el-button
         >
-        <el-button size="small">取消</el-button>
+        <el-button size="small" @click="handleHideDrawer">取消</el-button>
       </div>
     </template>
   </el-drawer>
 </template>
 
 <script setup>
-import { couponListAPI, couponAPI } from '@/api/coupon'
-import { reactive, ref } from 'vue'
+import {
+  couponListAPI,
+  couponAPI,
+  deleteCouponAPI,
+  failureCouponAPI
+} from '@/api/coupon'
+import { computed, reactive, ref } from 'vue'
 import ATable from '@/components/Table/a-table'
 import Paging from '@/components/Paging'
 import clos from './clos'
 import { couponStatus } from './couponStatus'
 import { Notification } from '@/utils/Notification'
+// 标题
+const drawerTilte = computed(() => {
+  return couponModel.id ? '修改' : '新增'
+})
 // 表单ref
 const couponModelRef = ref(null)
 // 抽屉组件显示隐藏
@@ -192,7 +205,7 @@ const handleSubmit = async () => {
     await couponAPI(couponModel)
     await getCouponList()
     handleHideDrawer()
-    Notification('新增成功', '', 'success')
+    Notification(couponModel.id ? '修改成功' : '新增成功', '', 'success')
   } catch (e) {
     console.log(e)
   }
@@ -207,6 +220,37 @@ const currentChange = async (page) => {
   try {
     current.value = page
     await getCouponList()
+  } catch (e) {
+    console.log(e)
+  }
+}
+// 修改 回填数据
+const handleEdit = (row) => {
+  for (const rowKey in row) {
+    couponModel[rowKey] = row[rowKey]
+  }
+  couponModel.time = [
+    new Date(couponModel.start_time),
+    new Date(couponModel.end_time)
+  ]
+  drawerVisable.value = true
+}
+// 删除
+const handleDelete = async (id) => {
+  try {
+    await deleteCouponAPI(id)
+    await getCouponList()
+    Notification('删除成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
+}
+// 失效
+const handleFailure = async (id) => {
+  try {
+    await failureCouponAPI(id, { status: 0 })
+    await getCouponList()
+    Notification('失效成功', '', 'success')
   } catch (e) {
     console.log(e)
   }
