@@ -6,7 +6,7 @@
           >新增</el-button
         >
         <el-tooltip content="刷新数据" placement="top">
-          <el-button icon="refresh" text></el-button>
+          <el-button icon="refresh" text @click="getCouponList"></el-button>
         </el-tooltip>
       </div>
       <!--      表格-->
@@ -62,7 +62,7 @@
           >
         </template>
       </ATable>
-      <Paging :total="total"></Paging>
+      <Paging :total="total" @currentChange="currentChange"></Paging>
     </el-card>
   </div>
   <!-- 抽屉 -->
@@ -201,6 +201,15 @@ const handleSubmit = async () => {
 const handleHideDrawer = () => {
   drawerVisable.value = false
   couponModelRef.value.resetFields()
+}
+// 分页
+const currentChange = async (page) => {
+  try {
+    current.value = page
+    await getCouponList()
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 
