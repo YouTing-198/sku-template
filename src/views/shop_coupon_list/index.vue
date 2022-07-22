@@ -9,13 +9,14 @@
           <el-button icon="refresh" text @click="getCouponList"></el-button>
         </el-tooltip>
       </div>
-      <!--      表格-->
+      <!-- 表格 -->
       <ATable :clos="clos" :data="couponList">
-        <!--        优惠券名称-->
+        <!-- 优惠券名称 -->
         <template #coupon_name="{ row }">
           <div
             :class="{
-              border: couponStatus(row.start_time, row.end_time) === '1'
+              border:
+                couponStatus(row.start_time, row.end_time, row.status) === '1'
             }"
             class="coupon_name"
           >
@@ -23,26 +24,37 @@
             <span>{{ row.start_time }} ~ {{ row.end_time }}</span>
           </div>
         </template>
-        <!--        状态-->
+        <!-- 状态 -->
         <template #status="{ row }">
-          <span v-if="couponStatus(row.start_time, row.end_time) === '0'"
+          <span
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) === '0'
+            "
             >未开始</span
           >
-          <span v-if="couponStatus(row.start_time, row.end_time) === '2'"
+          <span
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) === '2'
+            "
             >已结束</span
           >
-          <span v-if="couponStatus(row.start_time, row.end_time) === '1'"
+          <span
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) === '1'
+            "
             >领取中</span
           >
         </template>
-        <!--        优惠-->
+        <!-- 优惠 -->
         <template #discount="{ row }">
           {{ row.type === 0 ? `折扣 ${row.value}折` : `满减 ￥${row.value}` }}
         </template>
-        <!--        操作-->
+        <!-- 操作 -->
         <template #action="{ row }">
           <el-button
-            v-if="couponStatus(row.start_time, row.end_time) === '0'"
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) === '0'
+            "
             size="small"
             text
             type="primary"
@@ -50,7 +62,9 @@
             >修改
           </el-button>
           <el-popconfirm
-            v-if="couponStatus(row.start_time, row.end_time) !== '1'"
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) !== '1'
+            "
             title="确定要删除该优惠券吗?"
             @confirm="handleDelete(row.id)"
           >
@@ -59,7 +73,9 @@
             </template>
           </el-popconfirm>
           <el-button
-            v-if="couponStatus(row.start_time, row.end_time) === '1'"
+            v-if="
+              couponStatus(row.start_time, row.end_time, row.status) === '1'
+            "
             type="danger"
             @click="handleFailure(row.id)"
             >失效
@@ -69,7 +85,7 @@
       <Paging :total="total" @currentChange="currentChange"></Paging>
     </el-card>
   </div>
-  <!--  添加--修改-抽屉-->
+  <!-- 添加修改的抽屉 -->
   <el-drawer v-model="drawerVisable" size="40%">
     <template #header>
       <span>{{ drawerTilte }}</span>
