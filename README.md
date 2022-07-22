@@ -30,4 +30,5 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### 槽点
 
-抽屉动画
+404 页面
+loading
