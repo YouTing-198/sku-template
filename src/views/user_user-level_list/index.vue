@@ -21,8 +21,10 @@
             @change="(status) => handleChangeStatus(status, row.id)"
           ></el-switch>
         </template>
-        <template #action>
-          <el-button link type="primary">修改</el-button>
+        <template #action="{ row }">
+          <el-button link type="primary" @click="handleEdit(row)"
+            >修改</el-button
+          >
           <el-button link type="primary">删除</el-button>
         </template>
       </ATable>
@@ -31,7 +33,7 @@
       <!--    添加-修改抽屉-->
       <el-drawer v-model="levelDrawerVisible" size="40%">
         <template #header>
-          <span>新增</span>
+          <span>{{ drawerTitle }}</span>
         </template>
         <el-form
           ref="levelFormRef"
@@ -101,12 +103,16 @@
 
 <script setup>
 import { getLevelListAPI, editStatusAPI, userLevelAPI } from '@/api/userLevel'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import ATable from '@/components/Table/a-table'
 import tableColumn from './tableColumn'
 import Paging from '@/components/Paging'
 import { Notification } from '@/utils/Notification'
 import rules from './formRules'
+// 抽屉标题
+const drawerTitle = computed(() => {
+  return levelModel.id ? '修改' : '新增'
+})
 // 表单ref
 const levelFormRef = ref(null)
 // 添加-修改数据模型
@@ -119,7 +125,7 @@ const levelModel = reactive({
   discount: ''
 })
 // 添加-修改抽屉
-const levelDrawerVisible = ref(true)
+const levelDrawerVisible = ref(false)
 // 页码
 const current = ref(1)
 // 等级列表
@@ -173,9 +179,23 @@ const handleSubmit = async () => {
   }
 }
 // 重置表单 关闭抽屉
-const handleResetForm = () => {
-  levelFormRef.value.resetFields()
+const handleResetForm = async () => {
+  await levelFormRef.value.resetFields()
   levelDrawerVisible.value = false
+  for (const key in levelModel) {
+    if (key === 'status') {
+      levelModel[key] = 1
+    } else {
+      levelModel[key] = ''
+    }
+  }
+}
+// 修改--回填数据
+const handleEdit = (row) => {
+  for (const rowKey in row) {
+    levelModel[rowKey] = row[rowKey]
+  }
+  levelDrawerVisible.value = true
 }
 </script>
 
