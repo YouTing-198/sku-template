@@ -67,11 +67,22 @@
         {{ user_level?.name }}
       </template>
       <template #status="{ row }">
-        <el-switch v-model="row.switchStatus"></el-switch>
+        <el-switch
+          v-model="row.switchStatus"
+          :disabled="row.switchDisabled"
+          @change="(status) => handleChangeStatus(row, status)"
+        ></el-switch>
       </template>
       <template #action="{ row }">
         <el-button link type="primary" @click="handleEdit(row)">修改</el-button>
-        <el-button link type="primary">删除</el-button>
+        <el-popconfirm
+          title="是否删除该条记录"
+          @confirm="handleDelUser(row.id)"
+        >
+          <template #reference>
+            <el-button link type="primary">删除</el-button>
+          </template>
+        </el-popconfirm>
       </template>
     </ATable>
     <Paging :total="total" @currentChange="currentChange"></Paging>
@@ -151,7 +162,12 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
-import { userListAPI, addUserListAPI } from '@/api/userList'
+import {
+  userListAPI,
+  addUserListAPI,
+  editUserStatusAPI,
+  delUserListAPI
+} from '@/api/userList'
 import { Notification } from '@/utils/Notification'
 import ATable from '@/components/Table/a-table'
 import column from './tableColumn'
@@ -204,6 +220,7 @@ const getUserList = async () => {
       } else {
         item.switchStatus = false
       }
+      item.switchDisabled = false
     })
     total.value = res.totalCount
   } catch (e) {
@@ -257,6 +274,29 @@ const handleEdit = (row) => {
     userListModel[rowKey] = row[rowKey]
   }
   drawerVisable.value = true
+}
+// 修改用户状态
+const handleChangeStatus = async (row, switchStatus) => {
+  try {
+    row.switchDisabled = true
+    const status = switchStatus ? 1 : 0
+    await editUserStatusAPI(row.id, { status })
+    await getUserList()
+    Notification('修改状态成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
+  row.switchDisabled = false
+}
+// 删除用户
+const handleDelUser = async (id) => {
+  try {
+    await delUserListAPI(id)
+    await getUserList()
+    Notification('删除成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 <style lang="scss" scoped>
