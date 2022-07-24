@@ -25,7 +25,11 @@
           <el-button link type="primary" @click="handleEdit(row)"
             >修改</el-button
           >
-          <el-button link type="primary">删除</el-button>
+          <el-popconfirm title="是否删除该条记录?" @confirm="handleDel(row)">
+            <template #reference>
+              <el-button link type="primary">删除</el-button>
+            </template>
+          </el-popconfirm>
         </template>
       </ATable>
       <!--    分页-->
@@ -102,7 +106,12 @@
 </template>
 
 <script setup>
-import { getLevelListAPI, editStatusAPI, userLevelAPI } from '@/api/userLevel'
+import {
+  getLevelListAPI,
+  editStatusAPI,
+  userLevelAPI,
+  deleteLevelAPI
+} from '@/api/userLevel'
 import { computed, reactive, ref } from 'vue'
 import ATable from '@/components/Table/a-table'
 import tableColumn from './tableColumn'
@@ -196,6 +205,16 @@ const handleEdit = (row) => {
     levelModel[rowKey] = row[rowKey]
   }
   levelDrawerVisible.value = true
+}
+// 删除会员等级
+const handleDel = async (row) => {
+  try {
+    await deleteLevelAPI(row.id)
+    await getLevelList()
+    Notification('删除成功', '', 'success')
+  } catch (e) {
+    console.log(e)
+  }
 }
 </script>
 
