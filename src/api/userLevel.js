@@ -14,3 +14,12 @@ export const editStatusAPI = (id, status) => {
     data: status
   })
 }
+// 添加-修改接口
+export const userLevelAPI = (data) => {
+  const url = data.id ? `user_level/${data.id}` : 'user_level'
+  return request({
+    url,
+    method: 'POST',
+    data
+  })
+}
